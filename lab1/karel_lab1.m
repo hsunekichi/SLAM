@@ -228,10 +228,10 @@ function [measurements] = get_measurements_and_data_association(map)
     measurements.R_k = diag(sigma_z.^2);
 
     % data association
-    measurements.ids_f = intersect(map.true_ids, visible_ids);
-    measurements.ids_n = setdiff(visible_ids, map.true_ids);
-    measurements.z_pos_f = find(ismember(visible_ids, measurements.ids_f));
-    measurements.z_pos_n = find(ismember(visible_ids, measurements.ids_n));
+    measurements.ids_f = intersect(map.true_ids, visible_ids); % Ground truth ids of features already in the map
+    measurements.ids_n = setdiff(visible_ids, map.true_ids); % Ground truth ids of new features
+    measurements.z_pos_f = find(ismember(visible_ids, measurements.ids_f)); % Index of visible features already existing
+    measurements.z_pos_n = find(ismember(visible_ids, measurements.ids_n)); % Index of visible new features
     measurements.x_pos_f = find(ismember(map.true_ids, visible_ids));
 
     %features already in the map
@@ -241,10 +241,6 @@ function [measurements] = get_measurements_and_data_association(map)
     %new features
     measurements.z_n = measurements.z_k(measurements.z_pos_n);
     measurements.R_n = measurements.R_k(measurements.z_pos_n,measurements.z_pos_n);
-
-    % Print measurements.R_n shape
-    fprintf('R_n shape: %d x %d\n', size(measurements.R_n,1), size(measurements.R_n,2));
-    fprintf('R_k shape: %d x %d\n', size(measurements.R_k,1), size(measurements.R_k,2));
 end
 
 %-------------------------------------------------------------------------
@@ -267,7 +263,7 @@ end
 
 %-------------------------------------------------------------------------
 % add_new_features
-% Updates the map with measurements from the sensors
+% Adds new measurements to the sensors
 %-------------------------------------------------------------------------
 
 function [map] = add_new_features (map, measurements)
@@ -280,10 +276,14 @@ function [map] = add_new_features (map, measurements)
     map.hat_x = [map.hat_x; map.hat_x(1) + measurements.z_n]; % Update estimated positions
     
     % Update covariance matrix
-    % Extend rows with zeros
-    %map.hat_P = [map.hat_P, zeros(size(map.hat_P,1),length(measurements.z_n))];
-    %map.hat_P = [map.hat_P; zeros(length(measurements.z_n),size(map.hat_P,2))];
-    %map.hat_p 
+    % Add space for new data
+    map.hat_P = [map.hat_P, zeros(size(map.hat_P,1),length(measurements.z_n))];
+    map.hat_P = [map.hat_P; zeros(length(measurements.z_n),size(map.hat_P,2))];
+    
+    % Fill with new data
+    new_ids = measurements.ids_n + 1; % Features start on 2; 1 is the robot
+    robot_variance = map.hat_P(1,1);
+    map.hat_P(new_ids, new_ids) = robot_variance + measurements.R_n; % Update covariance matrix
 
     map.true_ids = [map.true_ids; measurements.ids_n]; % Update true ids
     map.true_x = [map.true_x; world.true_robot_location + measurements.z_n]; % Update true positions
