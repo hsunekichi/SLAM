@@ -242,6 +242,9 @@ function [measurements] = get_measurements_and_data_association(map)
     measurements.z_n = measurements.z_k(measurements.z_pos_n);
     measurements.R_n = measurements.R_k(measurements.z_pos_n,measurements.z_pos_n);
 
+    % Print measurements.R_n shape
+    fprintf('R_n shape: %d x %d\n', size(measurements.R_n,1), size(measurements.R_n,2));
+    fprintf('R_k shape: %d x %d\n', size(measurements.R_k,1), size(measurements.R_k,2));
 end
 
 %-------------------------------------------------------------------------
@@ -277,7 +280,10 @@ function [map] = add_new_features (map, measurements)
     map.hat_x = [map.hat_x; map.hat_x(1) + measurements.z_n]; % Update estimated positions
     
     % Update covariance matrix
-    dasdasd
+    % Extend rows with zeros
+    %map.hat_P = [map.hat_P, zeros(size(map.hat_P,1),length(measurements.z_n))];
+    %map.hat_P = [map.hat_P; zeros(length(measurements.z_n),size(map.hat_P,2))];
+    %map.hat_p 
 
     map.true_ids = [map.true_ids; measurements.ids_n]; % Update true ids
     map.true_x = [map.true_x; world.true_robot_location + measurements.z_n]; % Update true positions

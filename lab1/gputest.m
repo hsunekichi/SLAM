@@ -1,5 +1,7 @@
+g_time = tic;
+
 % Define the size of the matrices
-N = 10000; % You can change this to any desired size
+N = 5000; % You can change this to any desired size
 
 tic;
 
@@ -15,9 +17,13 @@ C_gpu = A_gpu * B_gpu;
 
 toc;
 
+tic;
 % Transfer the result back to the CPU
 C = gather(C_gpu);
+toc;
 
 % Display a message (not the full result, since the matrix is large)
 disp('Matrix multiplication of NxN matrices completed using gpuArray.');
 %disp(['The size of the result matrix is: ', num2str(size(C))]);
+
+toc(g_time);

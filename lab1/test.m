@@ -1,5 +1,5 @@
 % Define the size of the matrices
-N = 10000; % You can change this to any desired size
+N = 5000; % You can change this to any desired size
 
 tic;
 
