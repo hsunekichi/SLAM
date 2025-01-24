@@ -254,8 +254,28 @@ function[map] = update_map (map, measurements)
     % DO SOMETHING HERE!
     % You need to compute H_k, y_k, S_k, K_k and update map.hat_x and map.hat_P
 
+    % Compute H_k
+    H_k = sparse(length(measurements.z_f), length(map.hat_x));
+    H_k(:, measurements.x_pos_f) = speye(length(measurements.z_f));
+    H_k(:, 1) = -ones(length(measurements.z_f), 1);
+
+    % Compute y_k
+    y_k = measurements.z_f - H_k * map.hat_x;
+
+    % Compute S_k
+    S_k = H_k * map.hat_P * H_k' + measurements.R_f;
+
+    % Compute K_k
+    K_k = map.hat_P * H_k' / S_k;
+
+    % Update map.hat_x
+    map.hat_x = map.hat_x + K_k * y_k;
+
+    % Update map.hat_P
+    map.hat_P = (eye(size(map.hat_P)) - K_k * H_k) * map.hat_P;
+
     if config.step_by_step
-        fprintf('Updape map for last %d features...\n',length(measurements.ids_f));
+        fprintf('Update map for last %d features...\n', length(measurements.ids_f));
         plot_correlation(map.hat_P);
         pause
     end
