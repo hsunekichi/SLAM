@@ -21,7 +21,10 @@ global config;
 config.step_by_step = 0;
 
 %number of robot motions for each local map
-config.steps_per_map = 1000;
+config.steps_per_map = 200;
+
+% number of local maps to join
+config.n_maps = 5;
 
 % figure counter (to always plot a new figure)
 config.fig = 0;
@@ -70,6 +73,7 @@ sensor.range_max = 2;
 % all map details
 
 global map;
+global local_map;
 
 %            R0: absolute location of base reference for map
 %         hat_x: estimated robot and feature locations
@@ -103,8 +107,10 @@ global map;
 % BEGIN
 %-------------------------------------------------------------------------
 
-[map] = Kalman_filter_slam (map, config.steps_per_map);
-
+for i = 1:config.n_maps
+    [local_map] = Kalman_filter_slam (map, config.steps_per_map);
+    map = sequential_map_joining(map, local_map);
+end
 display_map_results (map);
 
 %-------------------------------------------------------------------------
@@ -255,7 +261,12 @@ function[map] = update_map (map, measurements)
     % You need to compute H_k, y_k, S_k, K_k and update map.hat_x and map.hat_P
 
     % Compute H_k
-    H_k = sparse(measurements.z_f * pinv(map.hat_x));
+    H_k = zeros(length(measurements.z_n),length(map.hat_x));
+    H_k(:, 1) = -1;
+
+    feature_ids = arrayfun(@(id) find(map.true_ids == id), measurements.ids_f);
+    H_k(sub2ind(size(H_k), 1:length(measurements.z_f), feature_ids)) = 1;
+    H_k = sparse(H_k);
 
     % Compute y_k
     y_k = measurements.z_f - H_k * map.hat_x;
@@ -291,20 +302,30 @@ function [map] = add_new_features (map, measurements)
 
     % DO SOMETHING HERE!
     % update map.hat_x, map.hat_P, map.true_ids, map.true_x, map.n
-    map.hat_x = [map.hat_x; map.hat_x(1) + measurements.z_n]; % Update estimated positions
-    
-    % Update covariance matrix
-    % Add space for new data
-    map.hat_P = [map.hat_P, zeros(size(map.hat_P,1),length(measurements.z_n))];
-    map.hat_P = [map.hat_P; zeros(length(measurements.z_n),size(map.hat_P,2))];
-    
-    % Fill with new data
-    new_ids = measurements.ids_n + 1; % Features start on 2; 1 is the robot
-    robot_variance = map.hat_P(1,1);
-    map.hat_P(new_ids, new_ids) = robot_variance + measurements.R_n; % Update covariance matrix
+
+    % Transformation matrix J1 (keeps previous elements)
+    m = length(map.hat_x);
+    n = length(measurements.z_n);
+    J1 = zeros(m+n, m);
+
+    J1(1:m, 1:m) = eye(m);
+    J1(m+1:end, 1) = 1;
+    J1 = sparse(J1);
+
+    % Transformation matrix J2 (adds new features)
+    J2 = zeros(m+n, n);
+    J2(m+1:end, :) = eye(n);
+    J2 = sparse(J2);
+
+    % New state estimation with new features
+    map.hat_x = J1 * map.hat_x + J2 * measurements.z_n;
+    % map.hat_x = [map.hat_x; map.hat_x(1) + measurements.z_n];
+
+    % Covariance matrix with new features
+    map.hat_P = J1 * map.hat_P * J1' + J2 * measurements.R_n * J2';
 
     map.true_ids = [map.true_ids; measurements.ids_n]; % Update true ids
-    map.true_x = [map.true_x; world.true_robot_location + measurements.z_n]; % Update true positions
+    map.true_x = [map.true_x; world.true_point_locations(measurements.ids_n)]; % Update true x 
     map.n = map.n + length(measurements.ids_n); % Update number of features
 
     if config.step_by_step
@@ -402,3 +423,58 @@ function Corr=correlation(Cov)
     Corr = diag(1./sigmas)*Cov*diag(1./sigmas);
 
 end
+
+
+%-------------------------------------------------------------------------
+% sequential_map_joining
+%-------------------------------------------------------------------------
+
+function [global_map] = sequential_map_joining(map, local_map)
+
+    if isempty(map)
+        global_map = local_map;
+        return;
+    end
+
+    % Initialize global map
+    global_map = map;
+    
+    % Transformation matrix J1 (keeps previous elements)
+    m = length(map.hat_x);
+    n = length(local_map.hat_x);
+    J1 = zeros(m+n, m);
+
+    J1(1:m, 1:m) = eye(m);
+    J1(m+1:end, 1) = 1;
+    J1 = sparse(J1);
+
+    % Transformation matrix J2 (adds new elements)
+    J2 = zeros(m+n, n);
+    J2(1, 1) = 1;
+    J2(m+1:end, :) = eye(n);
+    J2(m+1, 1) = 0;
+    J2 = sparse(J2);
+
+    global_map.hat_x = J1 * global_map.hat_x + J2 * local_map.hat_x;
+    % map.hat_x = [map.hat_x; map.hat_x(1) + measurements.z_n];
+
+    % Covariance matrix with new elements
+    global_map.hat_P = J1 * global_map.hat_P * J1' + J2 * local_map.hat_P * J2';
+
+    % Update true ids
+    global_map.true_ids = [global_map.true_ids; local_map.true_ids];
+
+    % Update true x
+    global_map.true_x = [global_map.true_x; local_map.true_x];
+
+    % Update stats
+    global_map.stats.true_x = [global_map.stats.true_x; local_map.stats.true_x + local_map.R0];
+    global_map.stats.error_x = [global_map.stats.error_x; local_map.stats.error_x];
+    global_map.stats.sigma_x = [global_map.stats.sigma_x; local_map.stats.sigma_x];
+    global_map.stats.cost_t = [global_map.stats.cost_t; local_map.stats.cost_t];
+
+    % Update number of features
+    global_map.n = global_map.n + local_map.n;
+    
+    end
+    
