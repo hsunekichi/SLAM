@@ -21,10 +21,10 @@ global config;
 config.step_by_step = 0;
 
 %number of robot motions for each local map
-config.steps_per_map = 200;
+config.steps_per_map = 1000;
 
 % number of local maps to join
-config.n_maps = 5;
+config.n_maps = 1;
 
 % figure counter (to always plot a new figure)
 config.fig = 0;
@@ -51,7 +51,7 @@ global robot;
 %    factor_x: fraction of the motion that constitutes odometry error
 %     true_uk: ground true robot motion per step
 
-robot.factor_x = 0.1; % ten percent
+robot.factor_x = 0.1; % ten percent  % 0 percent ex 3
 robot.true_uk = 1; % each true motion is 1m
 %-------------------------------------------------------------------------
 
@@ -64,7 +64,7 @@ global sensor;
 %    range_min: minimum sensor range
 %    range_max: maximum sensor range
 
-sensor.factor_z = 0.01; % one percent
+sensor.factor_z = 0.01; % one percent  % 0 percent ex 4
 sensor.range_min = 0;
 sensor.range_max = 2;
 %-------------------------------------------------------------------------
@@ -140,6 +140,7 @@ function[map] = Kalman_filter_slam (map, steps)
 
     map.hat_P = zeros(steps,steps);
     map.hat_P = [0];
+    % map.hat_P (1, 1) = 0.5; % ex 7
 
     % feature ids, for robot = 0
     map.true_ids = [0];
@@ -346,6 +347,7 @@ function  display_map_results (map)
     config.fig = config.fig + 1;
     figure(config.fig);
     axis([0 length(map.hat_x) -2*max(sqrt(diag(map.hat_P))) 2*max(sqrt(diag(map.hat_P)))]);
+    % axis([0 length(map.hat_x) -1 1]);
     grid on;
     hold on;
     plot(map.true_ids, map.hat_x-map.true_x, 'ro','Linewidth', 2);
@@ -381,6 +383,7 @@ function  display_map_results (map)
     config.fig = config.fig + 1;
     figure(config.fig);
     axis([0 map.stats.true_x(end) -2*max(map.stats.sigma_x) 2*max(map.stats.sigma_x)]);
+    % axis([0 map.stats.true_x(end) -1 1]);
     grid on;
     hold on;
     plot(map.stats.true_x, map.stats.error_x,'r-','Linewidth',2);
