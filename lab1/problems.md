@@ -1,11 +1,3 @@
-# Report
-
-## update map
-
-## add new features
-
-## Sequential Map Joining
-
 # Problems
 
 ## 3.-Assume that Karel has perfect (zero error) odometry. Analise the KF SLAM equations, decide whether KF SLAM is possible, and if it it is, detail what the covariance matrix of the map would look like.
