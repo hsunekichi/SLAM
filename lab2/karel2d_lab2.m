@@ -19,7 +19,7 @@ configuration.tags = 0;
 configuration.odometry = 1;
 configuration.noise = 1;
 configuration.alpha = 0.99; % only useful is chi2inv is available
-configuration.step_by_step = 1;
+configuration.step_by_step = 0;
 configuration.people = 0;
 configuration.ekf_iterations = 4;
 configuration.maintenance = 1;
@@ -47,7 +47,7 @@ global map;
 %     estimated: history of estimated robot location
 %      odometry: history of  robot odometry
 %  covisibility: matrix of features that have been covisible.
-     
+
 
 %-------------------------------------------------------
 global ground;
@@ -78,7 +78,7 @@ global results;
 %     total: total number of measurements at every step
 %      true: number of true positives and negatives ar every step
 %     false: number of fasle positives and negatives ar every step
-    
+
 %-------------------------------------------------------
 global compatibility;
 %-------------------------------------------------------
@@ -96,7 +96,7 @@ global prediction;
 %             h: predicted locations
 %           HPH: predicted covariance
 %             H: z = Hx
-%        ground: ground true predicted feature location 
+%        ground: ground true predicted feature location
 
 
 %-------------------------------------------------------
@@ -120,7 +120,7 @@ draw_ground(ground);
 pause
 
 if configuration.people
-    people.x = []; 
+    people.x = [];
     people.y = [];
 end
 
@@ -151,25 +151,25 @@ draw_map (map, ground, step);
 
 steps = length(ground.motion);
 for step = 2 : steps,
-    
+
     disp('--------------------------------------------------------------');
     disp(sprintf('Step: %d', step));
-    
+
     %  EKF prediction step
     [motion, odometry, map] = compute_motion(map, step);
-    
+
     % sense
     observations = get_observations(ground, sensor, step);
-    
+
     %data association
     [H, GT, compatibility] = data_association(map, observations, step);
-    
+
     % update EKF step
     map = EKF_update (map, observations, H);
-    
+
     % only new features with no neighbours
     map = add_new_features (map, observations, step, H);
-    
+
     % map maintenance:
     %
     % map.hits(i): number of times feature i has been observed
@@ -177,9 +177,9 @@ for step = 2 : steps,
     %
     % unreliable: features seen only once, more than two steps ago
 
-    % unreliable = ; 
-    % map = erase_features(map, unreliable);
-    
+    unreliable = find(map.hits == 1 & (step - map.first) > 2);
+    map = erase_features(map, unreliable);
+
     draw_map (map, ground, step);
     results = store_results(results, observations, GT, H);
 end
