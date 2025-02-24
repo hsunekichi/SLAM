@@ -177,8 +177,10 @@ for step = 2 : steps,
     %
     % unreliable: features seen only once, more than two steps ago
 
-    unreliable = find(map.hits == 1 & (step - map.first) > 2);
-    map = erase_features(map, unreliable);
+    if configuration.maintenance
+        unreliable = find(map.hits == 1 & (step - map.first) > 2);
+        map = erase_features(map, unreliable);
+    end
 
     draw_map (map, ground, step);
     results = store_results(results, observations, GT, H);
