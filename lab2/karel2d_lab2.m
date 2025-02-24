@@ -149,6 +149,11 @@ results = store_results (results, observations, GT, H);
 configuration.name = '';
 draw_map (map, ground, step);
 
+global elapsed_total;
+global nElapsed;
+elapsed_total = 0;
+nElapsed = 0;
+
 steps = length(ground.motion);
 for step = 2 : steps,
 
