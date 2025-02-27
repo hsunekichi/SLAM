@@ -7,6 +7,24 @@ global nElapsed;
 
 % individual compatibility
 prediction = predict_observations (map);
+
+% Extract robot position
+robotx = prediction.h(1);
+roboty = prediction.h(2);
+
+% Extract feature coordinates
+feature_coords = reshape(prediction.h(3:end), 2, []);  % Reshape to 2-row matrix (x; y)
+
+% Compute Euclidean distances in a vectorized way
+distances = sqrt((feature_coords(1, :) - robotx).^2 + (feature_coords(2, :) - roboty).^2);
+
+% Get ids lesser than zero
+ids = find(distances < 0);
+
+% Build h again with the correct ids
+
+
+
 compatibility = compute_compatibility (prediction, observations);
 
 % ground truth
@@ -23,9 +41,12 @@ disp(['GROUND  TRUTH: ' sprintf('%2d  ', GT)]);
 
 tic;
 H = JCBB (prediction, observations, compatibility);
-elapsed_total = elapsed_total + toc;
+elapsed = toc;
+elapsed_total = elapsed_total + elapsed;
 nElapsed = nElapsed + 1;
-
+% Print average
+disp(['Elapsed time: ' num2str(elapsed)]);
+disp(['Average time: ' num2str(elapsed_total/nElapsed)]);
 
 disp(['MY HYPOTHESIS: ' sprintf('%2d  ', H)]);
 disp(['Correct (1/0)? ' sprintf('%2d  ', GT == H)]);
