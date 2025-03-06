@@ -17,6 +17,7 @@
 
 #include "MiniSLAM.h"
 
+
 #include "Optimization/g2oBundleAdjustment.h"
 
 using namespace std;

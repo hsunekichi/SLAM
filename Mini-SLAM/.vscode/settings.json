@@ -67,6 +67,15 @@
         "print": "cpp",
         "queue": "cpp",
         "stack": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "any": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "fstream": "cpp",
+        "numeric": "cpp",
+        "sstream": "cpp",
+        "__split_buffer": "cpp",
+        "execution": "cpp"
     }
 }

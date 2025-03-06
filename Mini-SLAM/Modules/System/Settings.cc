@@ -16,6 +16,7 @@
 */
 
 #include "Calibration/PinHole.h"
+#include "Calibration/FishEye.h"
 
 #include "Settings.h"
 
@@ -33,17 +34,51 @@ Settings::Settings(const std::string& configFile) {
         exit(-1);
     }
 
+    enum CameraType 
+    {
+        PINHOLE = 0,
+        FISHEYE = 1
+    };
+
     //Read camera calibration
+    CameraType cameraType = PINHOLE;   
+    if (!fSettings["Camera.type"].empty()) {
+        cameraType = (CameraType)(int)fSettings["Camera.type"];
+    }
+
     float fx = fSettings["Camera.fx"];
     float fy = fSettings["Camera.fy"];
     float cx = fSettings["Camera.cx"];
     float cy = fSettings["Camera.cy"];
-    vector<float> vCalibration = {fx,fy,cx,cy};
 
-    calibration_ = shared_ptr<CameraModel>(new PinHole(vCalibration));
+    vector<float> vCalibration;
 
+    switch (cameraType)
+    {
+        case PINHOLE:
+            vCalibration = {fx,fy,cx,cy};
+            calibration_ = std::make_shared<PinHole>(vCalibration);
+            break;
+
+        case FISHEYE:
+        {
+
+            float k1 = fSettings["Camera.k0"];
+            float k2 = fSettings["Camera.k1"];
+            float k3 = fSettings["Camera.k2"];
+            float k4 = fSettings["Camera.k3"];
+
+            vCalibration = {fx,fy,cx,cy, k1, k2, k3, k4};
+            calibration_ = std::make_shared<FishEye>(vCalibration);
+            break;
+        }
+        default:
+            throw std::invalid_argument("Invalid camera type");
+    }
+    
     //Read (if exists) distortion parameters
-    if(!fSettings["Camera.k1"].empty()){
+    if(cameraType == PINHOLE && !fSettings["Camera.k1"].empty())
+    {
         if(!fSettings["Camera.k3"].empty()){
             vDistortion_.resize(5);
             vDistortion_[4] = fSettings["Camera.k3"];

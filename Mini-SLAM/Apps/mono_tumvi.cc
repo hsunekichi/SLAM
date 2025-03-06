@@ -1,70 +1,78 @@
 /**
- * mono_tumvi.cc
+* This file is part of Mini-SLAM
+*
+* Copyright (C) 2021 Juan J. Gómez Rodríguez and Juan D. Tardós, University of Zaragoza.
+*
+* Mini-SLAM is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+* License as published by the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* Mini-SLAM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+* the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with Mini-SLAM.
+* If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+ * Author: Juan J. Gómez Rodríguez (jjgomez@unizar.es)
  *
- * A demo application that runs Mini-SLAM on a TUM-VI room1 sequence using a fish-eye camera.
- *
- * Usage:
- *    ./mono_tumvi <dataset_path>
+ * A demo showing the Mini-SLAM library processing a sequence of the TUM dataset
  */
 
- #include "DatasetLoader/TUMVILoader.h"  // Use the loader for the TUM-VI dataset.
+ #include "DatasetLoader/TUMVILoader.h"
  #include "System/MiniSLAM.h"
+ 
  #include <opencv2/opencv.hpp>
- #include <fstream>
- #include <iomanip>
- #include <iostream>
  
  using namespace std;
  
- int main(int argc, char **argv) {
-     // Ensure the program is invoked with the dataset path.
-     if (argc != 2) {
-         cerr << "[Error]: You must invoke the program with 1 parameter:" << endl;
-         cerr << "\t./mono_tumvi <dataset_path>" << endl;
+ int main(int argc, char **argv){
+     //Check program parameters are good
+     if(argc != 3){
+         cerr << "[Error]: you need to invoke the program with 1 parameters: " << endl;
+         cerr << "\t./mono_euroc <dataset_path> <timestamps_file>" << endl;
+         cerr << "Finishing execution..." << endl;
          return -1;
      }
  
-     // Load the dataset sequence.
+     //Load dataset sequence
      string datasetPath = argv[1];
-     // The TUMVILoader is assumed to be provided (similar to TUMRGBDLoader)
-     // and will load the fish-eye room1 sequence (for example, from room1/rgb.txt).
-     TUMVILoader sequence(datasetPath, datasetPath + "/rgb.txt");
+     string timestampsFile = argv[2];
+     TUMVILoader sequence(datasetPath, timestampsFile, datasetPath + "/mav0/state_groundtruth_estimate0/data.csv");
  
-     // Create the MiniSLAM system using a configuration file that supports the fish-eye camera.
-     // Make sure Data/TUMVI.yaml defines the camera type as "FishEye" and includes the 8 parameters.
-     MiniSLAM SLAM("Data/TUMVI.yaml");
+     //Create SLAM system
+     MiniSLAM SLAM("Data/TUMRGBD.yaml");
  
-     // Open a file to store the estimated trajectory.
-     ofstream trajectoryFile("trajectory.txt");
-     if (!trajectoryFile.is_open()) {
-         cerr << "[Error]: Could not open trajectory file, aborting..." << endl;
+     //File to store the trajectory
+     ofstream trajectoryFile ("trajectory.txt");
+     if (!trajectoryFile.is_open()){
+         cerr << "[Error]: could not open the trajectory file, aborting..." << endl;
          return -2;
      }
  
+     //Process the sequence
      cv::Mat currIm;
      double currTs;
-     // Process each image in the sequence.
-     for (int i = 0; i < sequence.getLenght(); i++) {
-         sequence.getRGBImage(i, currIm);
-         sequence.getTimeStamp(i, currTs);
+     for(int i = 0; i < sequence.getLenght(); i++){
+         sequence.getLeftImage(i,currIm);
+         sequence.getTimeStamp(i,currTs);
  
          Sophus::SE3f Tcw;
-         if (SLAM.processImage(currIm, Tcw)) {
-             // Convert the camera pose Tcw to world pose Twc.
+         if(SLAM.processImage(currIm, Tcw)){
              Sophus::SE3f Twc = Tcw.inverse();
-             // Save the predicted pose to the file.
-             trajectoryFile << setprecision(17) << currTs << ","
-                            << setprecision(7) << Twc.translation()(0) << ","
-                            << Twc.translation()(1) << ","
-                            << Twc.translation()(2) << ","
-                            << Twc.unit_quaternion().x() << ","
-                            << Twc.unit_quaternion().y() << ","
-                            << Twc.unit_quaternion().z() << ","
-                            << Twc.unit_quaternion().w() << endl;
+             //Save predicted pose to the file
+             trajectoryFile << setprecision(17) << currTs << "," << setprecision(7) << Twc.translation()(0) << ",";
+             trajectoryFile << Twc.translation()(1) << "," << Twc.translation()(2) << ",";
+             trajectoryFile << Twc.unit_quaternion().x() << "," << Twc.unit_quaternion().y() << ",";
+             trajectoryFile << Twc.unit_quaternion().z() << "," << Twc.unit_quaternion().w() << endl;
          }
      }
  
      trajectoryFile.close();
+ 
      return 0;
  }
+ 
  

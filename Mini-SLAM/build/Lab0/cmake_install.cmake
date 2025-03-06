@@ -1,4 +1,4 @@
-# Install script for directory: /home/hsunekichi/Escritorio/Mini-SLAM/Lab0
+# Install script for directory: /home/hsunekichi/Escritorio/SLAM/Mini-SLAM/Lab0
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,8 +44,8 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/hsunekichi/Escritorio/Mini-SLAM/build/Lab0/Modules/cmake_install.cmake")
-  include("/home/hsunekichi/Escritorio/Mini-SLAM/build/Lab0/Apps/cmake_install.cmake")
+  include("/home/hsunekichi/Escritorio/SLAM/Mini-SLAM/build/Lab0/Modules/cmake_install.cmake")
+  include("/home/hsunekichi/Escritorio/SLAM/Mini-SLAM/build/Lab0/Apps/cmake_install.cmake")
 
 endif()
 

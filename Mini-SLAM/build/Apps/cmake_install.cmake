@@ -1,4 +1,4 @@
-# Install script for directory: /home/hsunekichi/Escritorio/Mini-SLAM/Apps
+# Install script for directory: /home/hsunekichi/Escritorio/SLAM/Mini-SLAM/Apps
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
