@@ -42,7 +42,7 @@ Settings::Settings(const std::string& configFile) {
 
     //Read camera calibration
     CameraType cameraType = PINHOLE;   
-    if (!fSettings["Camera.type"].empty()) {
+    if(!fSettings["Camera.type"].empty()){
         cameraType = (CameraType)(int)fSettings["Camera.type"];
     }
 

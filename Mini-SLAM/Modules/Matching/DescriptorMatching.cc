@@ -64,7 +64,7 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
         // Define a search window around the reference keypoint.
         // Here we use the keypoint's location as the center.
         // The radius is chosen as 15 multiplied by the current frame's scale factor for that octave.
-        float radius = 1.0f * currFrame.getScaleFactor(vRefKeys[i].octave);
+        float radius = 15.0f * currFrame.getScaleFactor(vRefKeys[i].octave);
 
         // Determine the allowed scale levels for the search.
         int minLevel = vRefKeys[i].octave - 1;
@@ -250,7 +250,6 @@ int searchWithProjection(Frame& currFrame, int th, std::vector<std::shared_ptr<M
             nMatches++;
         }
         
-        
     }
 
     return nMatches;
@@ -361,7 +360,40 @@ int fuse(std::shared_ptr<KeyFrame> pKF, int th, std::vector<std::shared_ptr<MapP
         /*
          * Your code for Lab 4 - Task 3 here!
          */
+        /*
+        // Project the MapPoint into the KeyFrame
+        Eigen::Vector3f p3Dc = Tcw * pMP->getWorldPosition();
+        cv::Point2f uv = calibration->project(p3Dc);
+        
+        // Define a search window around the projected point
+        float radius = 15.0f * pKF->getScaleFactor(1);
+
+        // Get features in the area around the projected point
+        pKF->getFeaturesInArea(uv.x, uv.y, radius, 0, 1, vIndicesToCheck);
+
+        // Match with the one with the smallest Hamming distance
+        int bestDist = th;
+        size_t bestIdx = -1;
+        for(auto j : vIndicesToCheck)
+        {
+            int dist = HammingDistance(pMP->getDescriptor().row(0), descMat.row(j));
+
+            if(dist < bestDist){
+                bestDist = dist;
+                bestIdx = j;
+            }
+        }
+        
+        if(bestIdx != -1 && bestDist < th){
+            if (vKFMps[bestIdx]) {
+                pMap->fuseMapPoints(pMP->getId(), vKFMps[bestIdx]->getId());
+                nFused++;
+            }
+        }
+        pMap->addObservation(pKF->getId(), pMP->getId(), bestIdx);
+        */
     }
 
     return nFused;
 }
+

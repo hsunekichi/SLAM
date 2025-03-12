@@ -54,6 +54,30 @@ void LocalMapping::mapPointCulling() {
     /*
      * Your code for Lab 4 - Task 4 here!
      */
+    
+    // Iterate through all MapPoints in the map
+    for (auto it = pMap_->getMapPoints().begin(); it != pMap_->getMapPoints().end(); ++it) {
+        // Get the MapPoint
+        shared_ptr<MapPoint> pMP = it->second;
+
+        bool isBadMapPoint = false;
+        // Implement your criteria for determining if a MapPoint is bad
+        // Return true if the MapPoint is bad, false otherwise
+        // Example criteria: check if the MapPoint has very few observations
+
+        // Get the number of observations of the MapPoint
+        int numObservations = pMap_->getNumberOfObservations(pMP->getId());
+        if (numObservations < 2) {
+            isBadMapPoint =  true; // Consider MapPoint as bad if it has less than 2 observations
+        }
+
+        // Check if the MapPoint meets the criteria for being a bad MapPoint
+        if (isBadMapPoint) {
+            // Remove the bad MapPoint from the map
+            pMap_->removeMapPoint(pMP->getId());
+        }
+    }
+    
 }
 
 void LocalMapping::triangulateNewMapPoints() {
@@ -98,13 +122,46 @@ void LocalMapping::triangulateNewMapPoints() {
 
         vector<cv::KeyPoint> vTriangulated1, vTriangulated2;
         vector<int> vMatches_;
-        //Try to triangulate a new MapPoint with each match
+        // Try to triangulate a new MapPoint with each match
         for(size_t i = 0; i < vMatches.size(); i++){
-            if(vMatches[i] != -1){
+            if (vMatches[i] != -1){
                 /*
                  * Your code for Lab 4 - Task 2 here!
                  * Note that the last KeyFrame inserted is stored at this->currKeyFrame_
                  */
+
+                
+
+                // Triangulate the 3D point
+                cv::KeyPoint keypoint1 = currKeyFrame_->getKeyPoint(i);
+                cv::KeyPoint keypoint2 = pKF->getKeyPoint(vMatches[i]);
+                Eigen::Vector3f point3D;
+                triangulate(calibration1->unproject(keypoint1.pt), pKF->getCalibration()->unproject(keypoint2.pt), T1w, T2w, point3D);
+
+                // Check if the triangulated point is geometrically correct
+                Eigen::Vector3f normal1 = point3D - T1w.translation();
+                Eigen::Vector3f normal2 = point3D - T2w.translation();
+                float cosParallax = cosRayParallax(normal1, normal2);
+
+                cv::Point2f uv1= calibration1->project(point3D);
+                float reprojectionError = squaredReprojectionError(keypoint1.pt, uv1);
+                
+                if(cosParallax < settings_.getMinCos() || reprojectionError > 0.01)//settings_.getMaxReprojectionError())
+                {
+                    // cout << "Triangulation faile - reprojectionError = " << reprojectionError << " cosParallax = " << cosParallax << endl;
+                    continue;
+                }
+
+                // Insert the MapPoint into the map
+                shared_ptr<MapPoint> pMP(new MapPoint(point3D));
+
+                // Add the observation of the MapPoint in the KeyFrames
+                pMap_->addObservation(currKeyFrame_->getId(), pMP->getId(), i);
+                pMap_->addObservation(pKF->getId(), pMP->getId(), vMatches[i]);
+
+                nTriangulated++;
+
+                
             }
         }
     }

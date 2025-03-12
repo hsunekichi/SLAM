@@ -357,6 +357,41 @@ bool Tracking::needNewKeyFrame() {
     /*
      * Your code for Lab 4 - Task 1 here!
      */
+    
+    // Check the number of tracked map points
+    int numTrackedMapPoints = currFrame_.getMapPoints().size();
+
+    // Check the number of feature matches
+    int numFeatureMatches = vMatches_.size();
+
+    // Check the number of feature tracks
+    int numFeatureTracks = nFeatTracked_;
+
+    // Define the threshold values for each criterion
+    int minTrackedMapPoints = 50;
+    int minFeatureMatches = 100;
+    int minFeatureTracks = 20;
+
+    // Check if the criteria for KeyFrame insertion are met
+    if (numTrackedMapPoints < minTrackedMapPoints || numFeatureMatches < minFeatureMatches || numFeatureTracks < minFeatureTracks) {
+        return true;
+    }
+
+    // Check the ratio of feature matches to tracked map points
+    double matchToMapPointRatio = static_cast<double>(numFeatureMatches) / numTrackedMapPoints;
+    double minMatchToMapPointRatio = 0.7;
+
+    if (matchToMapPointRatio < minMatchToMapPointRatio) {
+        return true;
+    }
+
+    // Check the ratio of feature tracks to feature matches
+    double trackToMatchRatio = static_cast<double>(numFeatureTracks) / numFeatureMatches;
+    double minTrackToMatchRatio = 0.8;
+
+    if (trackToMatchRatio < minTrackToMatchRatio) {
+        return true;
+    }
 
     return false;
 }
