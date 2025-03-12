@@ -56,6 +56,11 @@
      cv::Mat currIm;
      double currTs;
      for(int i = 0; i < sequence.getLenght(); i++){
+        if (i > 0 && i < 100)
+        {
+            continue;
+        }
+        
          sequence.getLeftImage(i,currIm);
          sequence.getTimeStamp(i,currTs);
  
