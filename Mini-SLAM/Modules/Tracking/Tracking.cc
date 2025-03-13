@@ -368,9 +368,9 @@ bool Tracking::needNewKeyFrame() {
     int numFeatureTracks = nFeatTracked_;
 
     // Define the threshold values for each criterion
-    int minTrackedMapPoints = 50;
-    int minFeatureMatches = 100;
-    int minFeatureTracks = 20;
+    int minTrackedMapPoints = 10;
+    int minFeatureMatches = 25;
+    int minFeatureTracks = 10;
 
     // Check if the criteria for KeyFrame insertion are met
     if (numTrackedMapPoints < minTrackedMapPoints || numFeatureMatches < minFeatureMatches || numFeatureTracks < minFeatureTracks) {
@@ -379,7 +379,7 @@ bool Tracking::needNewKeyFrame() {
 
     // Check the ratio of feature matches to tracked map points
     double matchToMapPointRatio = static_cast<double>(numFeatureMatches) / numTrackedMapPoints;
-    double minMatchToMapPointRatio = 0.7;
+    double minMatchToMapPointRatio = 0.2;
 
     if (matchToMapPointRatio < minMatchToMapPointRatio) {
         return true;
@@ -387,7 +387,7 @@ bool Tracking::needNewKeyFrame() {
 
     // Check the ratio of feature tracks to feature matches
     double trackToMatchRatio = static_cast<double>(numFeatureTracks) / numFeatureMatches;
-    double minTrackToMatchRatio = 0.8;
+    double minTrackToMatchRatio = 0.2;
 
     if (trackToMatchRatio < minTrackToMatchRatio) {
         return true;

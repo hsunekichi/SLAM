@@ -360,13 +360,13 @@ int fuse(std::shared_ptr<KeyFrame> pKF, int th, std::vector<std::shared_ptr<MapP
         /*
          * Your code for Lab 4 - Task 3 here!
          */
-        /*
+        
         // Project the MapPoint into the KeyFrame
         Eigen::Vector3f p3Dc = Tcw * pMP->getWorldPosition();
         cv::Point2f uv = calibration->project(p3Dc);
         
         // Define a search window around the projected point
-        float radius = 15.0f * pKF->getScaleFactor(1);
+        float radius = 5.0f * pKF->getScaleFactor(pKF->getKeyPoint(i).octave);
 
         // Get features in the area around the projected point
         pKF->getFeaturesInArea(uv.x, uv.y, radius, 0, 1, vIndicesToCheck);
@@ -383,15 +383,19 @@ int fuse(std::shared_ptr<KeyFrame> pKF, int th, std::vector<std::shared_ptr<MapP
                 bestIdx = j;
             }
         }
-        
-        if(bestIdx != -1 && bestDist < th){
-            if (vKFMps[bestIdx]) {
+
+        if(bestIdx != -1 && bestDist < th)
+        {
+            if (vKFMps[bestIdx]) 
+            {
                 pMap->fuseMapPoints(pMP->getId(), vKFMps[bestIdx]->getId());
                 nFused++;
             }
         }
-        pMap->addObservation(pKF->getId(), pMP->getId(), bestIdx);
-        */
+        else
+        {
+            pMap->addObservation(pKF->getId(), pMP->getId(), i);
+        }
     }
 
     return nFused;

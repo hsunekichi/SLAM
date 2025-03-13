@@ -54,7 +54,7 @@ void LocalMapping::mapPointCulling() {
     /*
      * Your code for Lab 4 - Task 4 here!
      */
-    
+    /*
     // Iterate through all MapPoints in the map
     for (auto it = pMap_->getMapPoints().begin(); it != pMap_->getMapPoints().end(); ++it) {
         // Get the MapPoint
@@ -77,7 +77,7 @@ void LocalMapping::mapPointCulling() {
             pMap_->removeMapPoint(pMP->getId());
         }
     }
-    
+    */
 }
 
 void LocalMapping::triangulateNewMapPoints() {
@@ -130,23 +130,34 @@ void LocalMapping::triangulateNewMapPoints() {
                  * Note that the last KeyFrame inserted is stored at this->currKeyFrame_
                  */
 
-                
-
                 // Triangulate the 3D point
                 cv::KeyPoint keypoint1 = currKeyFrame_->getKeyPoint(i);
                 cv::KeyPoint keypoint2 = pKF->getKeyPoint(vMatches[i]);
                 Eigen::Vector3f point3D;
-                triangulate(calibration1->unproject(keypoint1.pt), pKF->getCalibration()->unproject(keypoint2.pt), T1w, T2w, point3D);
+
+                Eigen::Vector3f l_v1 = calibration1->unproject(keypoint1.pt);
+                Eigen::Vector3f l_v2 = pKF->getCalibration()->unproject(keypoint2.pt);
+
+                triangulate(l_v1, l_v2, T1w, T2w, point3D);
+
+                Eigen::Vector3f w_v1 = point3D - T1w.translation();
+                Eigen::Vector3f w_v2 = point3D - T2w.translation();
+
+                Eigen::Vector4f pointHom = point3D.homogeneous();
+                Eigen::Vector3f l1_p = T1w.matrix3x4() * pointHom;
+                Eigen::Vector3f l2_p = T2w.matrix3x4() * pointHom;
 
                 // Check if the triangulated point is geometrically correct
-                Eigen::Vector3f normal1 = point3D - T1w.translation();
-                Eigen::Vector3f normal2 = point3D - T2w.translation();
-                float cosParallax = cosRayParallax(normal1, normal2);
+                float cosParallax = cosRayParallax(w_v1, w_v2);
 
-                cv::Point2f uv1= calibration1->project(point3D);
-                float reprojectionError = squaredReprojectionError(keypoint1.pt, uv1);
-                
-                if(cosParallax < settings_.getMinCos() || reprojectionError > 0.01)//settings_.getMaxReprojectionError())
+                cv::Point2f uv1 = calibration1->project(l1_p);
+                cv::Point2f uv2 = pKF->getCalibration()->project(l2_p);
+                float err1 = squaredReprojectionError(keypoint1.pt, uv1);
+                float err2 = squaredReprojectionError(keypoint2.pt, uv2);
+
+                if(cosParallax >= settings_.getMinCos() 
+                    || err1 >= 0.1 || err2 >= 0.1
+                    || l1_p.z() <= 0 || l2_p.z() <= 0)//settings_.getMaxReprojectionError())
                 {
                     // cout << "Triangulation faile - reprojectionError = " << reprojectionError << " cosParallax = " << cosParallax << endl;
                     continue;
@@ -155,15 +166,15 @@ void LocalMapping::triangulateNewMapPoints() {
                 // Insert the MapPoint into the map
                 shared_ptr<MapPoint> pMP(new MapPoint(point3D));
 
+                pMap_->insertMapPoint(pMP);
                 // Add the observation of the MapPoint in the KeyFrames
                 pMap_->addObservation(currKeyFrame_->getId(), pMP->getId(), i);
                 pMap_->addObservation(pKF->getId(), pMP->getId(), vMatches[i]);
 
                 nTriangulated++;
-
-                
             }
         }
+        
     }
 }
 

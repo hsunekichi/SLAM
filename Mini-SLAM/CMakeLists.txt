@@ -5,7 +5,7 @@ project(Mini-SLAM)
 #Build type:
 #   -Set to RELEASE to benchmark your code
 #   -Set to DEBUG to debug your code
-set(CMAKE_BUILD_TYPE DEBUG)
+set(CMAKE_BUILD_TYPE RELEASE)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
