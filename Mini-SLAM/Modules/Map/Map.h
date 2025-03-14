@@ -154,11 +154,20 @@ public:
         assert(graphIds.size() == 0);*/
     }
 
+    int getPointOldness(ID mpId){
+        if (pointOldness.find(mpId) == pointOldness.end()) {
+            return -1;
+        }
+        return pointOldness[mpId];
+    }
+
 private:
     /*
      * Updates the orientation and most distinctive descriptor of a MapPoint
      */
     void updateOrientationAndDescriptor(ID mpId);
+
+    std::unordered_map<ID, int> pointOldness;
 
     /*
      * Mapping of the KeyFrame/MapPoint ids and the KeyFrame/MapPoint itself

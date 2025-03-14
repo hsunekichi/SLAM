@@ -30,16 +30,18 @@ using namespace std;
 
 int main(int argc, char **argv){
     //Check program parameters are good
-    if(argc != 3){
-        cerr << "[Error]: you need to invoke the program with 2 parameters: " << endl;
-        cerr << "\t./mono_euroc <dataset_path> <timestamps_file>" << endl;
-        cerr << "Finishing execution..." << endl;
-        return -1;
-    }
+    //if(argc != 3){
+    //    cerr << "[Error]: you need to invoke the program with 2 parameters: " << endl;
+    //    cerr << "\t./mono_euroc <dataset_path> <timestamps_file>" << endl;
+    //    cerr << "Finishing execution..." << endl;
+    //    return -1;
+    //}
 
     //Load dataset sequence
-    string datasetPath = argv[1];
-    string timestampsFile = argv[2];
+    //string datasetPath = argv[1];
+    //string timestampsFile = argv[2];
+    string datasetPath = "datasets/V1_02_medium/";
+    string timestampsFile = "Apps/EuRoC_TimeStamps/V102.txt";
     EurocVisualLoader sequence(datasetPath, timestampsFile, datasetPath + "/mav0/state_groundtruth_estimate0/data.csv");
 
     //Create SLAM system
@@ -56,6 +58,10 @@ int main(int argc, char **argv){
     cv::Mat currIm;
     double currTs;
     for(int i = 150; i < sequence.getLenght(); i++){
+        
+        if (i > 150 && i < 160 )
+            continue;
+
         sequence.getLeftImage(i,currIm);
         sequence.getTimeStamp(i,currTs);
 

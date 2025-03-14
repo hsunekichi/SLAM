@@ -30,12 +30,18 @@ Map::Map(float minCommonObs){
 void Map::insertMapPoint(std::shared_ptr<MapPoint> pMP) {
     mMapPoints_[pMP->getId()] = pMP;
     mMapPointObs_[pMP->getId()].clear();
+    pointOldness[pMP->getId()] = 0;
 }
 
 void Map::insertKeyFrame(std::shared_ptr<KeyFrame> pKF) {
     mKeyFrames_[pKF->getId()] = pKF;
     mKeyFrameObs_[pKF->getId()].clear();
     mCovisibilityGraph_[pKF->getId()].clear();
+
+    for (auto &pairOld : pointOldness)
+    {
+        pairOld.second++;
+    }
 }
 
 void Map::removeMapPoint(ID id) {
@@ -51,6 +57,7 @@ void Map::removeMapPoint(ID id) {
 
     mMapPoints_.erase(id);
     mMapPointObs_.erase(id);
+    pointOldness.erase(id);
 }
 
 std::shared_ptr<KeyFrame> Map::getKeyFrame(ID id) {

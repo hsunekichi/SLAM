@@ -54,11 +54,15 @@ void LocalMapping::mapPointCulling() {
     /*
      * Your code for Lab 4 - Task 4 here!
      */
-    /*
+
+    std::vector<int> toRemove;
+    
     // Iterate through all MapPoints in the map
-    for (auto it = pMap_->getMapPoints().begin(); it != pMap_->getMapPoints().end(); ++it) {
+    for (auto it = pMap_->getMapPoints().begin(); it != pMap_->getMapPoints().end(); ++it) 
+    {
         // Get the MapPoint
         shared_ptr<MapPoint> pMP = it->second;
+        if (!pMP) continue;
 
         bool isBadMapPoint = false;
         // Implement your criteria for determining if a MapPoint is bad
@@ -67,17 +71,24 @@ void LocalMapping::mapPointCulling() {
 
         // Get the number of observations of the MapPoint
         int numObservations = pMap_->getNumberOfObservations(pMP->getId());
-        if (numObservations < 2) {
+        if (pMap_->getPointOldness(pMP->getId()) > 6 
+            && numObservations < 3) 
+        {
             isBadMapPoint =  true; // Consider MapPoint as bad if it has less than 2 observations
         }
 
         // Check if the MapPoint meets the criteria for being a bad MapPoint
-        if (isBadMapPoint) {
+        if (isBadMapPoint) 
+        {
             // Remove the bad MapPoint from the map
-            pMap_->removeMapPoint(pMP->getId());
+            toRemove.push_back(pMP->getId());
         }
     }
-    */
+
+    //std::cout << "********************* Culling " << toRemove.size() << " MapPoints out of " << pMap_->getMapPoints().size() << " *********************" << std::endl;
+    for (int i = 0; i < toRemove.size(); i++) {
+        pMap_->removeMapPoint(toRemove[i]);
+    }
 }
 
 void LocalMapping::triangulateNewMapPoints() {
@@ -166,11 +177,15 @@ void LocalMapping::triangulateNewMapPoints() {
                 // Insert the MapPoint into the map
                 shared_ptr<MapPoint> pMP(new MapPoint(point3D));
 
+                currKeyFrame_->setMapPoint(i, pMP);
+                pKF->setMapPoint(vMatches[i], pMP);
                 pMap_->insertMapPoint(pMP);
+
                 // Add the observation of the MapPoint in the KeyFrames
                 pMap_->addObservation(currKeyFrame_->getId(), pMP->getId(), i);
                 pMap_->addObservation(pKF->getId(), pMP->getId(), vMatches[i]);
 
+                
                 nTriangulated++;
             }
         }
