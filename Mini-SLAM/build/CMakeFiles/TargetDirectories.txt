@@ -16,5 +16,6 @@
 /home/hsunekichi/Escritorio/SLAM/Mini-SLAM/build/Apps/CMakeFiles/mono_euroc.dir
 /home/hsunekichi/Escritorio/SLAM/Mini-SLAM/build/Apps/CMakeFiles/mono_tumrgbd.dir
 /home/hsunekichi/Escritorio/SLAM/Mini-SLAM/build/Apps/CMakeFiles/mono_tumvi.dir
+/home/hsunekichi/Escritorio/SLAM/Mini-SLAM/build/Apps/CMakeFiles/mono_eina.dir
 /home/hsunekichi/Escritorio/SLAM/Mini-SLAM/build/Apps/CMakeFiles/edit_cache.dir
 /home/hsunekichi/Escritorio/SLAM/Mini-SLAM/build/Apps/CMakeFiles/rebuild_cache.dir
