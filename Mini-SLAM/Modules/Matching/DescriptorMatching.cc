@@ -64,7 +64,7 @@ int searchForInitializaion(Frame& refFrame, Frame& currFrame, int th, vector<int
         // Define a search window around the reference keypoint.
         // Here we use the keypoint's location as the center.
         // The radius is chosen as 15 multiplied by the current frame's scale factor for that octave.
-        float radius = 15.0f * currFrame.getScaleFactor(vRefKeys[i].octave);
+        float radius = 30.0f * currFrame.getScaleFactor(vRefKeys[i].octave);
 
         // Determine the allowed scale levels for the search.
         int minLevel = vRefKeys[i].octave - 1;
@@ -135,7 +135,7 @@ int guidedMatching(Frame& refFrame, Frame& currFrame, int th, std::vector<int>& 
         int nLastOctave = refFrame.getKeyPoint(i).octave;
 
         //Search radius depends on the size of the point in the image
-        float radius = 15 * windowSizeFactor * currFrame.getScaleFactor(nLastOctave);
+        float radius = 30 * windowSizeFactor * currFrame.getScaleFactor(nLastOctave);
 
         //Get candidates whose coordinates are close to the current point
         currFrame.getFeaturesInArea(uv.x,uv.y,radius,nLastOctave-1,nLastOctave+1,vIndicesToCheck);

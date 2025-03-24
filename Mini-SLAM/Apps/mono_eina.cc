@@ -25,6 +25,7 @@
 #include "System/MiniSLAM.h"
 
 #include <opencv2/opencv.hpp>
+#include <chrono>
 
 using namespace std;
 
@@ -54,16 +55,26 @@ int main(int argc, char **argv){
     //Process the sequence
     cv::Mat currIm;
     double currTs;
-    for(int i = 0; i < sequence.getLenght(); i++){
-        if (i > 0 && i < 60)
+    int nValid = 0;
+
+    for(int i = 0; i < sequence.getLenght(); i++)
+    {
+        //if (i > 0 && i < 30)
+        //    continue;
+        
+        if (i > 250 && nValid == 0)
         {
-            continue;
+            exit(1);
         }
+
         sequence.getRGBImage(i,currIm);
         sequence.getTimeStamp(i,currTs);
 
         Sophus::SE3f Tcw;
-        if(SLAM.processImage(currIm, Tcw)){
+        if(SLAM.processImage(currIm, Tcw))
+        {
+            nValid++;
+
             Sophus::SE3f Twc = Tcw.inverse();
             //Save predicted pose to the file
             trajectoryFile << setprecision(17) << currTs << "," << setprecision(7) << Twc.translation()(0) << ",";
@@ -71,18 +82,6 @@ int main(int argc, char **argv){
             trajectoryFile << Twc.unit_quaternion().x() << "," << Twc.unit_quaternion().y() << ",";
             trajectoryFile << Twc.unit_quaternion().z() << "," << Twc.unit_quaternion().w() << endl;
         }
-
-        /*
-        if (i % time_batch)
-        {
-            auto end_time = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> elapsed = end_time - init_time;
-            double t_ms = elapsed.count() * 1000;
-
-            std::cout << "Avg time: " << t_ms / time_batch << " ms" << std::endl;
-            init_time = std::chrono::high_resolution_clock::now();
-        }
-        */
     }
 
     trajectoryFile.close();

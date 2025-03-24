@@ -186,7 +186,7 @@ bool Tracking::monocularMapInitialization() {
     // visualizer_->drawFrameMatches(currFrame_.getKeyPointsDistorted(),currIm_,vMatches_);
 
     //If not enough matches found, updtate reference frame
-    if(nMatches < 70){
+    if(nMatches < 50){
         monoInitializer_.changeReference(currFrame_.getKeyPoints());
         prevFrame_.assign(currFrame_);
 
@@ -379,7 +379,7 @@ bool Tracking::needNewKeyFrame() {
 
     // Check the ratio of feature matches to tracked map points
     double matchToMapPointRatio = static_cast<double>(numFeatureMatches) / numTrackedMapPoints;
-    double minMatchToMapPointRatio = 0.3;
+    double minMatchToMapPointRatio = 0.2;
 
     if (matchToMapPointRatio < minMatchToMapPointRatio) {
         return true;
@@ -387,7 +387,7 @@ bool Tracking::needNewKeyFrame() {
 
     // Check the ratio of feature tracks to feature matches
     double trackToMatchRatio = static_cast<double>(numFeatureTracks) / numFeatureMatches;
-    double minTrackToMatchRatio = 0.3;
+    double minTrackToMatchRatio = 0.2;
 
     if (trackToMatchRatio < minTrackToMatchRatio) {
         return true;
