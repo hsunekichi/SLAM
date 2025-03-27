@@ -43,7 +43,7 @@
      TUMVILoader sequence(datasetPath, timestampsFile, datasetPath + "/mav0/state_groundtruth_estimate0/data.csv");
  
      //Create SLAM system
-     MiniSLAM SLAM("Data/TUMRGBD.yaml");
+     MiniSLAM SLAM("Data/TUM-VI.yaml");
  
      //File to store the trajectory
      ofstream trajectoryFile ("trajectory.txt");

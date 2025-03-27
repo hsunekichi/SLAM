@@ -43,7 +43,7 @@ int main(int argc, char **argv){
     TUMRGBDLoader sequence(datasetPath, datasetPath + "/rgb.txt");
 
     //Create SLAM system
-    MiniSLAM SLAM("Data/eina.yaml");
+    MiniSLAM SLAM("Data/juan.yaml");
 
     //File to store the trajectory
     ofstream trajectoryFile ("trajectory.txt");
@@ -62,10 +62,10 @@ int main(int argc, char **argv){
         //if (i > 0 && i < 30)
         //    continue;
         
-        if (i > 250 && nValid == 0)
-        {
-            exit(1);
-        }
+        //if (i > 250 && nValid == 0)
+        //{
+        //    exit(1);
+        //}
 
         sequence.getRGBImage(i,currIm);
         sequence.getTimeStamp(i,currTs);

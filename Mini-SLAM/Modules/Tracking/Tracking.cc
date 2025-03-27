@@ -181,7 +181,7 @@ bool Tracking::monocularMapInitialization() {
     }
 
     //Find matches between previous and current frame
-    int nMatches = searchForInitializaion(prevFrame_,currFrame_,settings_.getMatchingInitTh(),vMatches_,vPrevMatched_);
+    nMatches = searchForInitializaion(prevFrame_,currFrame_,settings_.getMatchingInitTh(),vMatches_,vPrevMatched_);
 
     // visualizer_->drawFrameMatches(currFrame_.getKeyPointsDistorted(),currIm_,vMatches_);
 
@@ -359,39 +359,53 @@ bool Tracking::needNewKeyFrame() {
      */
     
     // Check the number of tracked map points
-    int numTrackedMapPoints = currFrame_.getMapPoints().size();
+    auto &mapP = currFrame_.getMapPoints();
+    int numTrackedMapPoints = mapP.size() - std::count(mapP.begin(), mapP.end(), nullptr);
 
     // Check the number of feature matches
-    int numFeatureMatches = vMatches_.size();
+    int numFeatureMatches = nMatches;
 
     // Check the number of feature tracks
     int numFeatureTracks = nFeatTracked_;
 
-    // Define the threshold values for each criterion
-    int minTrackedMapPoints = 30;
-    int minFeatureMatches = 50;
-    int minFeatureTracks = 30;
+    // Max values a new keyframe can have
+    //int maxTrackedMapPoints = 85; // Tumvi
+    //int maxFeatureMatches = 150;
+    //int maxFeatureTracks = 85;
+
+    int maxTrackedMapPoints = 65; // Eina juan
+    int maxFeatureMatches = 75;
+    int maxFeatureTracks = 65;
+
+
+    std::cout << numTrackedMapPoints << " " << numFeatureMatches << " " << numFeatureTracks << std::endl;
 
     // Check if the criteria for KeyFrame insertion are met
-    if (numTrackedMapPoints < minTrackedMapPoints || numFeatureMatches < minFeatureMatches || numFeatureTracks < minFeatureTracks) {
+    if (numTrackedMapPoints < maxTrackedMapPoints 
+        || numFeatureMatches < maxFeatureMatches 
+        || numFeatureTracks < maxFeatureTracks) {
         return true;
     }
 
+    /********** Filter that the keyframe is good ***********/
+
+    /*
     // Check the ratio of feature matches to tracked map points
     double matchToMapPointRatio = static_cast<double>(numFeatureMatches) / numTrackedMapPoints;
-    double minMatchToMapPointRatio = 0.2;
-
-    if (matchToMapPointRatio < minMatchToMapPointRatio) {
+    double maxMatchToMapPointRatio = 0.2;
+    
+    if (matchToMapPointRatio < maxMatchToMapPointRatio) {
         return true;
     }
 
     // Check the ratio of feature tracks to feature matches
     double trackToMatchRatio = static_cast<double>(numFeatureTracks) / numFeatureMatches;
-    double minTrackToMatchRatio = 0.2;
+    double maxTrackToMatchRatio = 0.2;
 
-    if (trackToMatchRatio < minTrackToMatchRatio) {
+    if (trackToMatchRatio < maxTrackToMatchRatio) {
         return true;
     }
+    */
 
     return false;
 }

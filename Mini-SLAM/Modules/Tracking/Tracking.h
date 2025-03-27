@@ -100,6 +100,7 @@ private:
 
     //Matches between the reference and the current frame
     std::vector<int> vMatches_;
+    int nMatches = 0;
 
     //Tracking status
     enum TrackStatus{
@@ -128,6 +129,8 @@ private:
 
     //Number of features correctly tracked
     int nFeatTracked_;
+    int insertedOldness = 0;
+    int nKeyframeMapPoints = 0;
 
     //Last KeyFrame inserted
     std::shared_ptr<KeyFrame> pLastKeyFrame_;

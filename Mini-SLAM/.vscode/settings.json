@@ -78,6 +78,11 @@
         "__split_buffer": "cpp",
         "execution": "cpp",
         "iomanip": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "ranges": "cpp",
+        "regex": "cpp",
+        "valarray": "cpp",
+        "__hash_table": "cpp",
+        "__tree": "cpp"
     }
 }

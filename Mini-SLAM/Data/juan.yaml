@@ -1,20 +1,20 @@
 %YAML:1.0
 
 # Camera calibration and distortion parameters
-Camera.fx: 752.7546195
-Camera.fy: 753.69970474
-Camera.cx: 477.78699772
-Camera.cy: 269.97327465
+Camera.fx: 668.79027523
+Camera.fy: 669.99363597
+Camera.cx: 423.91078666
+Camera.cy: 240.16907861
 
-Camera.k1: 0.191014153
-Camera.k2: -0.906625516
-Camera.p1: 9.65020961e-04
-Camera.p2: 5.80654147e-04
-Camera.k3: 1.91961812
+Camera.k1: 0.15566185
+Camera.k2: -0.448178797
+Camera.p1: 9.21784059e-04
+Camera.p2: -2.51721003e-04
+Camera.k3: 0.3872732 
 
 # Camera resolution
-Camera.cols: 720
-Camera.rows: 405
+Camera.cols: 853
+Camera.rows: 480
 
 # Number of features per image
 FeatureExtractor.nFeatures: 1000
