@@ -373,17 +373,20 @@ bool Tracking::needNewKeyFrame() {
     //int maxFeatureMatches = 150;
     //int maxFeatureTracks = 85;
 
-    int maxTrackedMapPoints = 65; // Eina juan
-    int maxFeatureMatches = 75;
-    int maxFeatureTracks = 65;
+    //int maxTrackedMapPoints = 55; // Eina juan
+    //int maxFeatureMatches = 75;
+    //int maxFeatureTracks = 55;
 
+    auto &prevMapP = prevFrame_.getMapPoints();
+    int prevNewKeyThreshold = prevMapP.size() - std::count(prevMapP.begin(), prevMapP.end(), nullptr);
+    float perc = 0.6;
 
-    std::cout << numTrackedMapPoints << " " << numFeatureMatches << " " << numFeatureTracks << std::endl;
+    std::cout << numTrackedMapPoints << " out of " << perc*prevNewKeyThreshold << std::endl;
 
     // Check if the criteria for KeyFrame insertion are met
-    if (numTrackedMapPoints < maxTrackedMapPoints 
-        || numFeatureMatches < maxFeatureMatches 
-        || numFeatureTracks < maxFeatureTracks) {
+    if (numTrackedMapPoints < perc*prevNewKeyThreshold
+        || perc*prevNewKeyThreshold < 65) 
+    {
         return true;
     }
 

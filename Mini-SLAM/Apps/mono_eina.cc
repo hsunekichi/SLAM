@@ -59,8 +59,8 @@ int main(int argc, char **argv){
 
     for(int i = 0; i < sequence.getLenght(); i++)
     {
-        //if (i > 0 && i < 30)
-        //    continue;
+        if (i < 0)  // 270
+            continue;
         
         //if (i > 250 && nValid == 0)
         //{

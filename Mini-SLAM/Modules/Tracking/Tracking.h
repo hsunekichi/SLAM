@@ -129,8 +129,6 @@ private:
 
     //Number of features correctly tracked
     int nFeatTracked_;
-    int insertedOldness = 0;
-    int nKeyframeMapPoints = 0;
 
     //Last KeyFrame inserted
     std::shared_ptr<KeyFrame> pLastKeyFrame_;

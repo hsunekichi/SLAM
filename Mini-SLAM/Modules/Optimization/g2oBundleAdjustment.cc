@@ -48,7 +48,7 @@ void bundleAdjustment(Map* pMap){
     );
 
     optimizer.setAlgorithm(solver);
-    optimizer.setVerbose(true);
+    optimizer.setVerbose(false);
 
     const float thHuber2D = sqrt(5.99);
 
@@ -255,7 +255,7 @@ void localBundleAdjustment(Map* pMap, ID currKeyFrameId){
     );
 
     optimizer.setAlgorithm(solver);
-    optimizer.setVerbose(true);
+    optimizer.setVerbose(false);
 
     const float thHuber2D = sqrt(5.99);
 
