@@ -88,12 +88,15 @@ private:
     //Tracks the local map into the current frame to get more matches
     bool trackLocalMap();
 
+    bool insertingNewKeyframe();
+
     //Feature and descriptor extractors
     std::shared_ptr<Feature> featExtractor_;
     std::shared_ptr<Descriptor> descExtractor_;
 
     //Reference and current frame
     Frame currFrame_, prevFrame_;
+    Frame *prevKeyPtr_;
 
     //Last location a KeyPoint was seen. Only used in the monocular initialization
     std::vector<cv::Point2f> vPrevMatched_;

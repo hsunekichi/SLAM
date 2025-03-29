@@ -57,10 +57,10 @@ int main(int argc, char **argv){
     //Process the sequence
     cv::Mat currIm;
     double currTs;
-    for(int i = 150; i < sequence.getLenght(); i++){
-        
-        if (i > 150 && i < 160 )
-            continue;
+    for(int i = 100; i < sequence.getLenght(); i++)
+    {    
+        //if (i > 150 && i < 160 )
+        //    continue;
 
         sequence.getLeftImage(i,currIm);
         sequence.getTimeStamp(i,currTs);

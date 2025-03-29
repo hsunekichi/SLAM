@@ -86,6 +86,14 @@ int main(int argc, char **argv){
 
     trajectoryFile.close();
 
+    int finish;
+
+    std::cout << "Press any key to exit..." << std::endl;
+    std::cin >> finish;
+
+    //sleep
+    std::this_thread::sleep_for(std::chrono::seconds(1000));
+
     return 0;
 }
 

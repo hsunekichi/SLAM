@@ -34,9 +34,9 @@ Epipolar.th: 0.002
 
 #Feature matching thresholds
 Matching.initialization: 50
-Matching.guidedMatching: 100
-Matching.searchByProjection: 100
-Matching.searchForTriangulation: 50
+Matching.guidedMatching: 40
+Matching.searchByProjection: 40
+Matching.searchForTriangulation: 40
 Matching.fuse: 50
 
 #Covisivility graph

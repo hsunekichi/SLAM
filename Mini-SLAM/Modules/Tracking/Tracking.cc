@@ -353,29 +353,14 @@ bool Tracking::trackLocalMap() {
     return nFeatTracked_ >= 20;
 }
 
+/*
 bool Tracking::needNewKeyFrame() {
-    /*
-     * Your code for Lab 4 - Task 1 here!
-     */
+
+    // Your code for Lab 4 - Task 1 here!
     
     // Check the number of tracked map points
     auto &mapP = currFrame_.getMapPoints();
     int numTrackedMapPoints = mapP.size() - std::count(mapP.begin(), mapP.end(), nullptr);
-
-    // Check the number of feature matches
-    int numFeatureMatches = nMatches;
-
-    // Check the number of feature tracks
-    int numFeatureTracks = nFeatTracked_;
-
-    // Max values a new keyframe can have
-    //int maxTrackedMapPoints = 85; // Tumvi
-    //int maxFeatureMatches = 150;
-    //int maxFeatureTracks = 85;
-
-    //int maxTrackedMapPoints = 55; // Eina juan
-    //int maxFeatureMatches = 75;
-    //int maxFeatureTracks = 55;
 
     auto &prevMapP = prevFrame_.getMapPoints();
     int prevNewKeyThreshold = prevMapP.size() - std::count(prevMapP.begin(), prevMapP.end(), nullptr);
@@ -385,31 +370,66 @@ bool Tracking::needNewKeyFrame() {
 
     // Check if the criteria for KeyFrame insertion are met
     if (numTrackedMapPoints < perc*prevNewKeyThreshold
-        || perc*prevNewKeyThreshold < 65) 
+        || perc*prevNewKeyThreshold < 0) //55) 
     {
         return true;
     }
 
-    /********** Filter that the keyframe is good ***********/
+    return false;
+}
+*/
 
-    /*
-    // Check the ratio of feature matches to tracked map points
-    double matchToMapPointRatio = static_cast<double>(numFeatureMatches) / numTrackedMapPoints;
-    double maxMatchToMapPointRatio = 0.2;
+bool Tracking::insertingNewKeyframe()
+{
+    nFramesFromLastKF_ = 0;
+    prevKeyPtr_ = &currFrame_;
+
+    return true;
+}
+
+bool Tracking::needNewKeyFrame() 
+{
+    if (prevKeyPtr_ == nullptr)
+    {
+        insertingNewKeyframe();
+        return true;
+    }
+
+    nFramesFromLastKF_++;
+    int minFrames = 0;
+    int maxFrames = 40;
+
+    // Check if enough frames have passed since the last keyframe
+    if (nFramesFromLastKF_ < minFrames)
+        return false;        
+    // Force keyframe insertion if too many frames have passed
+    if (nFramesFromLastKF_ > maxFrames) 
+        return insertingNewKeyframe();
+
+    // Check the number of tracked map points
+    auto &mapP = currFrame_.getMapPoints();
+    int numTrackedMapPoints = mapP.size() - std::count(mapP.begin(), mapP.end(), nullptr);
+
+    auto &prevMapP = prevKeyPtr_->getMapPoints();
+    int prevNewKeyThreshold = prevMapP.size() - std::count(prevMapP.begin(), prevMapP.end(), nullptr);
+    float perc = 0.8;
+
+    std::cout << nFeatTracked_ << " features, " << numTrackedMapPoints << "<" << perc*prevNewKeyThreshold << " needed" << std::endl;
+
+    // Check tracking quality based on the number of tracked features
+    int minTrackedFeatures = 45;
+    if (nFeatTracked_ < minTrackedFeatures) 
+    {
+        return insertingNewKeyframe();
+    }
+
+    // Check if the criteria for KeyFrame insertion are met
+    if (numTrackedMapPoints < perc*prevNewKeyThreshold
+        || numTrackedMapPoints < 130)
+    {
+        return insertingNewKeyframe();
+    }
     
-    if (matchToMapPointRatio < maxMatchToMapPointRatio) {
-        return true;
-    }
-
-    // Check the ratio of feature tracks to feature matches
-    double trackToMatchRatio = static_cast<double>(numFeatureTracks) / numFeatureMatches;
-    double maxTrackToMatchRatio = 0.2;
-
-    if (trackToMatchRatio < maxTrackToMatchRatio) {
-        return true;
-    }
-    */
-
     return false;
 }
 
